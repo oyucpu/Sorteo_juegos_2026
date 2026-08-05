@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biblioteca de juegos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Work+Sans:wght@400;500;600&family=Space+Mono&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pine: #16241c;
+    --pine-2: #1e3327;
+    --ember: #e2a25c;
+    --ember-dim: #b57e46;
+    --parchment: #ece4d3;
+    --parchment-dim: #b9ae98;
+    --teal: #4c7a70;
+    --plum: #7a5266;
+    --card-bg: #1b2c22;
+    --border: rgba(236,228,211,0.12);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse 900px 500px at 20% -10%, rgba(226,162,92,0.10), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 10%, rgba(76,122,112,0.12), transparent 60%),
+      var(--pine);
+    color:var(--parchment);
+    font-family:'Work Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- header ---------- */
+  header{
+    position:relative;
+    padding:88px 6vw 64px;
+    overflow:hidden;
+    border-bottom:1px solid var(--border);
+  }
+  .ember-glow{
+    position:absolute;
+    left:6vw; top:36px;
+    width:14px; height:14px;
+    border-radius:50%;
+    background:var(--ember);
+    box-shadow:0 0 18px 6px rgba(226,162,92,0.55);
+    animation:flicker 2.6s ease-in-out infinite;
+  }
+  @keyframes flicker{
+    0%,100%{opacity:1; box-shadow:0 0 18px 6px rgba(226,162,92,0.55);}
+    45%{opacity:0.75; box-shadow:0 0 12px 3px rgba(226,162,92,0.35);}
+    60%{opacity:1; box-shadow:0 0 22px 8px rgba(226,162,92,0.6);}
+  }
+  .eyebrow{
+    font-family:'Space Mono', monospace;
+    font-size:12.5px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--ember);
+    margin:0 0 18px 34px;
+  }
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:500;
+    font-size:clamp(38px, 5.6vw, 68px);
+    line-height:1.02;
+    letter-spacing:-0.01em;
+    margin:0 0 20px;
+    max-width:14ch;
+  }
+  h1 em{font-style:italic; color:var(--ember); font-weight:400;}
+  header p.sub{
+    max-width:52ch;
+    font-size:16.5px;
+    line-height:1.6;
+    color:var(--parchment-dim);
+    margin:0;
+  }
+  .count-line{
+    margin-top:36px;
+    font-family:'Space Mono', monospace;
+    font-size:12.5px;
+    color:var(--parchment-dim);
+    letter-spacing:0.03em;
+  }
+  .count-line b{color:var(--ember); font-weight:400;}
+
+  /* ---------- filters ---------- */
+  .filters{
+    position:sticky; top:0; z-index:10;
+    display:flex; flex-wrap:wrap; gap:8px;
+    padding:18px 6vw;
+    background:rgba(22,36,28,0.92);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border);
+  }
+  .chip{
+    font-family:'Space Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.02em;
+    padding:7px 14px;
+    border-radius:100px;
+    border:1px solid var(--border);
+    background:transparent;
+    color:var(--parchment-dim);
+    cursor:pointer;
+    transition:border-color .15s, color .15s, background .15s;
+  }
+  .chip:hover{border-color:var(--ember-dim); color:var(--parchment);}
+  .chip.active{
+    background:var(--ember);
+    border-color:var(--ember);
+    color:var(--pine);
+    font-weight:600;
+  }
+
+  .sort-bar{
+    display:flex; align-items:center; gap:10px;
+    padding:16px 6vw 0;
+    flex-wrap:wrap;
+  }
+  .sort-label{
+    font-family:'Space Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--parchment-dim);
+    margin-right:2px;
+  }
+  .sort-btn{
+    font-family:'Space Mono', monospace;
+    font-size:12px;
+    padding:6px 13px;
+    border-radius:100px;
+    border:1px solid var(--border);
+    background:transparent;
+    color:var(--parchment-dim);
+    cursor:pointer;
+    transition:border-color .15s, color .15s, background .15s;
+  }
+  .sort-btn:hover{border-color:var(--teal); color:var(--parchment);}
+  .sort-btn.active{
+    background:var(--teal);
+    border-color:var(--teal);
+    color:var(--parchment);
+    font-weight:600;
+  }
+
+  /* ---------- grid ---------- */
+  main{padding:56px 6vw 100px;}
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));
+    gap:22px;
+  }
+  .card{
+    background:var(--card-bg);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:26px 24px 24px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    cursor:pointer;
+    transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+  }
+  .card:hover{
+    transform:translateY(-3px);
+    border-color:rgba(226,162,92,0.4);
+    box-shadow:0 14px 34px -14px rgba(0,0,0,0.55);
+  }
+  .card-top{display:flex; align-items:flex-start; justify-content:space-between; gap:12px;}
+  .glyph{font-size:26px; line-height:1;}
+  .platform{
+    font-family:'Space Mono', monospace;
+    font-size:10.5px;
+    color:var(--parchment-dim);
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:3px 7px;
+    white-space:nowrap;
+  }
+  .card h2{
+    font-family:'Fraunces', serif;
+    font-weight:500;
+    font-size:21px;
+    margin:0;
+    line-height:1.15;
+  }
+  .genres{
+    font-family:'Space Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.03em;
+    color:var(--ember);
+    text-transform:uppercase;
+  }
+  .card p.desc{
+    font-size:14px;
+    line-height:1.6;
+    color:var(--parchment-dim);
+    margin:0;
+    flex-grow:1;
+  }
+  .tags{display:flex; flex-wrap:wrap; gap:6px;}
+  .tag{
+    font-size:11px;
+    padding:4px 9px;
+    border-radius:100px;
+    background:rgba(76,122,112,0.18);
+    color:#a9c9c0;
+    border:1px solid rgba(76,122,112,0.3);
+  }
+  .similar{
+    font-size:12.5px;
+    color:var(--parchment-dim);
+    border-top:1px dashed var(--border);
+    padding-top:12px;
+    margin-top:2px;
+  }
+  .similar b{color:var(--plum); font-weight:600;}
+  .similar span{color:#c9a8b8;}
+
+  .empty{
+    grid-column:1/-1;
+    text-align:center;
+    padding:60px 20px;
+    color:var(--parchment-dim);
+    font-family:'Space Mono', monospace;
+    font-size:13px;
+  }
+
+  footer{
+    padding:34px 6vw 60px;
+    font-family:'Space Mono', monospace;
+    font-size:11.5px;
+    color:var(--parchment-dim);
+    border-top:1px solid var(--border);
+  }
+
+  @media (max-width:560px){
+    header{padding:64px 6vw 40px;}
+    .filters{padding:14px 6vw;}
+    main{padding:40px 6vw 80px;}
+  }
+
+  /* ---------- modal ---------- */
+  .overlay{
+    position:fixed; inset:0;
+    background:rgba(10,16,12,0.72);
+    backdrop-filter:blur(4px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:5vh 20px;
+    z-index:100;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .2s ease;
+  }
+  .overlay.open{opacity:1; pointer-events:auto;}
+  .modal{
+    background:var(--pine-2);
+    border:1px solid rgba(226,162,92,0.25);
+    border-radius:18px;
+    max-width:640px;
+    width:100%;
+    max-height:88vh;
+    overflow-y:auto;
+    box-shadow:0 30px 70px -20px rgba(0,0,0,0.7);
+    transform:translateY(14px) scale(0.98);
+    transition:transform .22s ease;
+  }
+  .overlay.open .modal{transform:translateY(0) scale(1);}
+  .modal-hero{
+    position:relative;
+    padding:44px 32px 28px;
+    background:
+      radial-gradient(ellipse 420px 260px at 20% -10%, rgba(226,162,92,0.22), transparent 65%),
+      radial-gradient(ellipse 360px 260px at 100% 0%, rgba(76,122,112,0.22), transparent 65%);
+    border-bottom:1px solid var(--border);
+  }
+  .modal-close{
+    position:absolute; top:18px; right:18px;
+    width:34px; height:34px;
+    border-radius:50%;
+    border:1px solid var(--border);
+    background:rgba(0,0,0,0.2);
+    color:var(--parchment);
+    font-size:16px;
+    line-height:1;
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:border-color .15s, color .15s;
+  }
+  .modal-close:hover{border-color:var(--ember); color:var(--ember);}
+  .modal-glyph{font-size:46px; line-height:1; margin-bottom:14px;}
+  .modal-hero h2{
+    font-family:'Fraunces', serif;
+    font-weight:500;
+    font-size:clamp(24px, 4vw, 32px);
+    margin:0 0 10px;
+    line-height:1.1;
+    max-width:88%;
+  }
+  .modal-meta{
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  }
+  .modal-genres{
+    font-family:'Space Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.03em;
+    color:var(--ember);
+    text-transform:uppercase;
+  }
+  .modal-body{padding:28px 32px 34px; display:flex; flex-direction:column; gap:24px;}
+  .modal-body p.desc{
+    font-size:15.5px;
+    line-height:1.7;
+    color:var(--parchment);
+    margin:0;
+  }
+  .modal-section-label{
+    font-family:'Space Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--parchment-dim);
+    margin:0 0 10px;
+  }
+  .modal-similar-list{
+    display:flex; flex-wrap:wrap; gap:8px;
+  }
+  .modal-similar-list span{
+    font-size:13px;
+    padding:6px 12px;
+    border-radius:100px;
+    background:rgba(122,82,102,0.18);
+    color:#d3b3c2;
+    border:1px solid rgba(122,82,102,0.32);
+  }
+  .modal-code-box{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    background:rgba(0,0,0,0.28);
+    border:1px dashed var(--border);
+    border-radius:10px;
+    padding:12px 16px;
+  }
+  .modal-code-box code{
+    font-family:'Space Mono', monospace;
+    font-size:13px;
+    color:var(--ember);
+    letter-spacing:0.04em;
+    word-break:break-all;
+  }
+  .modal-code-box code.empty{
+    color:var(--parchment-dim);
+    font-style:italic;
+  }
+  .copy-btn{
+    flex-shrink:0;
+    font-family:'Space Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.02em;
+    padding:7px 12px;
+    border-radius:8px;
+    border:1px solid var(--ember-dim);
+    background:transparent;
+    color:var(--ember);
+    cursor:pointer;
+    transition:background .15s, color .15s;
+  }
+  .copy-btn:hover{background:var(--ember); color:var(--pine);}
+  .copy-btn:disabled{
+    opacity:0.4;
+    cursor:default;
+    border-color:var(--border);
+    color:var(--parchment-dim);
+  }
+  .copy-btn:disabled:hover{background:transparent; color:var(--parchment-dim);}
+</style>
+</head>
+<body>
+
+<header>
+  <span class="ember-glow"></span>
+  <p class="eyebrow">colección personal</p>
+  <h1>Historias pequeñas,<br><em>luces</em> en la niebla.</h1>
+  <p class="sub">Una biblioteca de juegos narrativos, atmosféricos y de exploración — de los que se juegan despacio, junto a una hoguera o en mitad de un bosque desconocido.</p>
+  <div class="count-line">Juegos en la colección: <b id="countLabel">15</b></div>
+</header>
+
+<div class="sort-bar">
+  <span class="sort-label">Orden</span>
+  <button class="sort-btn active" id="sortDefault">Añadidos</button>
+  <button class="sort-btn" id="sortAZ">A → Z</button>
+</div>
+
+<div class="filters" id="filters"></div>
+
+<main>
+  <div class="grid" id="grid"></div>
+</main>
+
+<div class="overlay" id="overlay">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<footer>index.html · estructura pensada para añadir más juegos al array GAMES</footer>
+
+<script>
+  // ---- Añade más juegos aquí, siguiendo la misma estructura ----
+  const GAMES = [
+    {
+      emoji: "🌲", title: "Bramble: The Mountain King", platform: "PC",
+      code: "",
+      genres: ["Aventura","Terror suave","Fantasía","Exploración","Puzles"],
+      tags: ["aventura","fantasía","terror","narrativa","mitología","exploración","nórdico","atmosferico","un jugador"],
+      desc: "Olle se adentra en un bosque oscuro inspirado en la mitología nórdica para rescatar a su hermana secuestrada. Belleza inquietante y criaturas del folclore escandinavo.",
+      similar: ["Röki", "Little Nightmares", "Limbo"]
+    },
+    {
+      emoji: "🌧️", title: "Until Then", platform: "PC",
+      code: "",
+      genres: ["Aventura narrativa","Novela visual","Drama"],
+      tags: ["narrativo","historia","drama","misterio","emocional","adolescentes","pixel art","un jugador"],
+      desc: "Mark vive una vida normal en Filipinas mientras extraños sucesos afectan su realidad. Vida escolar, amistades y misterio sobre la memoria y el paso del tiempo.",
+      similar: ["Life is Strange", "Oxenfree", "A Space for the Unbound"]
+    },
+    {
+      emoji: "🧩", title: "The Witness", platform: "PC & Mac",
+      code: "",
+      genres: ["Puzles","Exploración","Mundo abierto"],
+      tags: ["puzles","exploración","misterio","lógica","mundo abierto","primera persona","un jugador","sin combate"],
+      desc: "Despiertas en una isla misteriosa llena de cientos de puzles y secretos. Sin combate: solo aprender las reglas del mundo observando.",
+      similar: ["Myst", "Outer Wilds"]
+    },
+    {
+      emoji: "💀", title: "Have a Nice Death", platform: "PC",
+      code: "",
+      genres: ["Roguelite","Acción","Metroidvania"],
+      tags: ["accion","roguelite","humor","combate","fantasia oscura","dificultad","un jugador","armas"],
+      desc: "Eres Death, jefe de Death Incorporated. Tus empleados se han rebelado y toca poner orden a golpe de combate rápido, mejoras permanentes y humor negro.",
+      similar: ["Hades", "Dead Cells"]
+    },
+    {
+      emoji: "🦌", title: "Blanc", platform: "PC",
+      code: "",
+      genres: ["Cooperativo","Aventura","Puzles"],
+      tags: ["cooperativo","aventura","emocional","puzles","animales","blanco y negro","sin combate","dos jugadores"],
+      desc: "Un cervatillo y un cachorro de lobo se pierden en una tormenta de nieve y deben colaborar para volver con sus familias. En blanco y negro, sin violencia.",
+      similar: ["It Takes Two", "Journey"]
+    },
+    {
+      emoji: "🧹", title: "Mika and the Witch's Mountain", platform: "PC",
+      code: "",
+      genres: ["Aventura","Fantasía","Exploración"],
+      tags: ["fantasia","aventura","exploracion","cozy","magia","vuelo","sandbox","un jugador"],
+      desc: "Mika, joven bruja en entrenamiento, vuela con su escoba, entrega paquetes y explora una montaña isleña. Inspirado en Kiki: entregas a domicilio.",
+      similar: ["Kiki: entregas a domicilio (Ghibli)"]
+    },
+    {
+      emoji: "🏜️", title: "Journey", platform: "PC",
+      code: "",
+      genres: ["Aventura","Exploración","Experiencia emocional"],
+      tags: ["exploracion","emocional","arte","aventura","espiritual","sin dialogos","multijugador online","un jugador"],
+      desc: "Un viaje sin diálogos por un desierto enorme hacia una montaña lejana. La historia se cuenta con música, paisajes y encuentros con otros jugadores.",
+      similar: ["Abzû", "Flower"]
+    },
+    {
+      emoji: "⚔️", title: "Death's Door", platform: "PC",
+      code: "",
+      genres: ["Acción","RPG","Aventura","Soulslike ligero"],
+      tags: ["accion","rpg","exploracion","fantasia oscura","aventura","mazmorras","jefes","un jugador"],
+      desc: "Un cuervo recolector de almas se ve envuelto en un misterio cuando un alma desaparece. Combate, mazmorras y jefes en un mundo con encanto sombrío.",
+      similar: ["Zelda", "Hollow Knight"]
+    },
+    {
+      emoji: "📄", title: "Origament: A Paper Adventure", platform: "PC",
+      code: "",
+      genres: ["Aventura","Puzles","Indie"],
+      tags: ["puzles","aventura","creativo","indie","exploracion","estetica artesanal","corto","un jugador"],
+      desc: "Un mundo hecho de papel donde avanzas resolviendo pequeños desafíos, con una estética artesanal y manipulación del propio escenario.",
+      similar: []
+    },
+    {
+      emoji: "🐧", title: "Bread & Fred", platform: "PC & Mac",
+      code: "",
+      genres: ["Plataformas","Cooperativo"],
+      tags: ["cooperativo","plataformas","dificultad","humor","fisicas","dos jugadores","penguinos"],
+      desc: "Dos pingüinos escalan una montaña juntos: cada uno depende del otro, hay que coordinarse perfectamente y la dificultad es alta.",
+      similar: ["Getting Over It", "Only Up"]
+    },
+    {
+      emoji: "🏔️", title: "Celeste", platform: "PC & Mac",
+      code: "",
+      genres: ["Plataformas","Acción","Narrativa"],
+      tags: ["plataformas","narrativa","emocional","dificultad","indie","precision","banda sonora","un jugador"],
+      desc: "Madeline sube la montaña Celeste luchando contra sus propios miedos. Plataformas muy precisas, gran banda sonora y una historia emocional.",
+      similar: []
+    },
+    {
+      emoji: "🔥", title: "The Last Campfire", platform: "PC",
+      code: "",
+      genres: ["Aventura","Puzles","Exploración"],
+      tags: ["aventura","puzles","narrativa","exploracion","emocional","corto","un jugador","acogedor"],
+      desc: "Ember, un pequeño ser, busca ayudar a otras almas perdidas resolviendo puzles en un mundo pequeño y precioso.",
+      similar: ["Röki", "Gris", "Little Nightmares"]
+    },
+    {
+      emoji: "🎭", title: "A Juggler's Tale", platform: "PC",
+      code: "",
+      genres: ["Aventura","Plataformas","Narrativa"],
+      tags: ["aventura","narrativa","plataformas","cuento oscuro","circo","libertad","un jugador"],
+      desc: "Abby, niña artista de circo bajo el control de un titiritero, en un mundo que funciona como un teatro de marionetas. Libertad, control y encontrar tu propia voz.",
+      similar: ["Little Nightmares", "Limbo"]
+    },
+    {
+      emoji: "🌀", title: "8Doors: Arum's Afterlife Adventure", platform: "PC",
+      code: "",
+      genres: ["Metroidvania","Acción","Aventura","RPG","Fantasía","Plataformas"],
+      tags: ["metroidvania","acción","fantasía","exploración","combate","mitología","mundo de los muertos","habilidades","un jugador"],
+      desc: "Arum viaja al mundo de los muertos para descubrir qué ocurrió con su padre. Inspirado en la mitología coreana: combate, exploración y habilidades desbloqueables.",
+      similar: ["Hollow Knight", "Death's Door", "Withering Rooms"]
+    },
+    {
+      emoji: "🌸", title: "Flower", platform: "PC",
+      code: "",
+      genres: ["Aventura","Exploración","Experiencia artística","Relajante","Casual"],
+      tags: ["relajante","naturaleza","exploración","emocional","arte","minimalista","viento","corto","sin combate"],
+      desc: "Controlas el viento llevando un pétalo por distintos paisajes, devolviendo color y vida a mundos apagados. Sin combates, corto y emocional.",
+      similar: ["Journey", "Abzû", "Gris"]
+    },
+    {
+      emoji: "🎨", title: "Gris", platform: "PC & Mac",
+      code: "",
+      genres: ["Plataformas","Aventura","Experiencia artística"],
+      tags: ["emocional","arte","exploracion","plataformas","minimalista","duelo","sin texto","un jugador"],
+      desc: "Gris pierde la voz y su mundo se desvanece en escala de grises. Un plataformas silencioso sobre atravesar el duelo, recuperando color a medida que avanza.",
+      similar: ["Journey", "Flower", "The Last Campfire"]
+    },
+    {
+      emoji: "📻", title: "Killer Frequency", platform: "PC",
+      code: "",
+      genres: ["Terror","Aventura narrativa","Puzles"],
+      tags: ["terror","comedia","narrativa","puzles","ochenta","telefono","decisiones","un jugador"],
+      desc: "Eres un DJ de radio nocturno en un pueblo de los 80 donde un asesino en serie anda suelto. Guías a los oyentes por teléfono, resuelves puzles y decides quién sobrevive. Terror con humor negro y mucha estética retro.",
+      similar: ["Oxenfree", "Until Then"]
+    },
+    {
+      emoji: "🥀", title: "Withering Rooms", platform: "PC",
+      code: "",
+      genres: ["Metroidvania","Terror","Soulslike ligero"],
+      tags: ["metroidvania","terror","fantasia oscura","combate","exploracion","mansion","victoriano","dificultad"],
+      desc: "Dos hermanas quedan atrapadas en una mansión victoriana que se retuerce entre realidades. Metroidvania de terror gótico con combate exigente y una atmósfera opresiva.",
+      similar: ["8Doors: Arum's Afterlife Adventure", "Hollow Knight", "Death's Door"]
+    },
+    {
+      emoji: "📖", title: "Tengami", platform: "PC & Mac",
+      code: "",
+      genres: ["Puzles","Aventura","Casual"],
+      tags: ["puzles","arte","relajante","exploracion","minimalista","papel","corto","sin combate"],
+      desc: "Un mundo de papel plegado como un libro pop-up japonés, donde doblas y despliegas el escenario para avanzar. Breve, contemplativo y visualmente único.",
+      similar: ["Origament: A Paper Adventure", "The Gardens Between"]
+    },
+    {
+      emoji: "🎷", title: "Genesis Noir", platform: "PC",
+      code: "",
+      genres: ["Aventura narrativa","Puzles","Experiencia artística"],
+      tags: ["narrativo","surrealismo","arte","emocional","musica","romance","abstracto","un jugador"],
+      desc: "Un romance entre No Man y Miss Mass reescrito como el nacimiento del universo, contado con estética jazz noir y puzles abstractos en cada escena.",
+      similar: ["Journey", "Kentucky Route Zero"]
+    },
+    {
+      emoji: "🍁", title: "Seasons after Fall", platform: "PC",
+      code: "",
+      genres: ["Puzles","Plataformas","Aventura"],
+      tags: ["puzles","naturaleza","arte","plataformas","exploracion","estaciones","banda sonora orquestal","un jugador"],
+      desc: "Un espíritu del bosque toma forma de zorra y aprende a controlar las cuatro estaciones para resolver puzles y restaurar el equilibrio natural. Pintado a mano, con banda sonora orquestal.",
+      similar: ["Gris", "Ori and the Blind Forest"]
+    },
+    {
+      emoji: "🦉", title: "Röki", platform: "PC & Mac",
+      code: "",
+      genres: ["Aventura","Puzles","Fantasía","Exploración"],
+      tags: ["aventura","fantasia","puzles","mitologia","emocional","folclore","un jugador","acogedor"],
+      desc: "Tove se adentra en un bosque nórdico embrujado para salvar a su hermano, ayudando a criaturas del folclore escandinavo con sus propios problemas. Cuento de hadas oscuro y muy tierno a la vez.",
+      similar: ["Bramble: The Mountain King", "The Last Campfire", "Mika and the Witch's Mountain"]
+    },
+    {
+      emoji: "🎨", title: "Hue", platform: "PC & Mac",
+      code: "",
+      genres: ["Puzles","Plataformas"],
+      tags: ["puzles","plataformas","color","logica","minimalista","daltonismo","corto","un jugador"],
+      desc: "Cambias el color de fondo para hacer desaparecer o aparecer plataformas y obstáculos del mismo tono. Puzles de lógica cromática con una historia sencilla sobre encontrar a tu madre.",
+      similar: ["The Witness", "Cocoon"]
+    },
+    {
+      emoji: "🛰️", title: "Citizen Sleeper", platform: "PC & Mac",
+      code: "",
+      genres: ["RPG narrativo","Ciencia ficción"],
+      tags: ["narrativo","ciencia ficcion","dados","emocional","historia","estacion espacial","identidad","un jugador"],
+      desc: "Eres una mente artificial en un cuerpo sintético fabricado para trabajar hasta desgastarse, huido a una estación espacial en decadencia. RPG narrativo basado en dados sobre identidad, explotación y comunidad.",
+      similar: ["Until Then", "Kentucky Route Zero"]
+    },
+    {
+      emoji: "⏳", title: "Timelie", platform: "PC",
+      code: "",
+      genres: ["Puzles","Sigilo","Aventura"],
+      tags: ["puzles","sigilo","tiempo","minimalista","logica","rebobinar","sin combate","un jugador"],
+      desc: "Una niña y un gato manipulan el tiempo hacia adelante y atrás para esquivar robots vigilantes en puzles de sigilo. Estética minimalista y mecánica de rebobinado muy original.",
+      similar: ["The Witness", "Hue"]
+    },
+    {
+      emoji: "🧙", title: "Ziggurat", platform: "PC",
+      code: "",
+      genres: ["Roguelite","Acción","FPS"],
+      tags: ["accion","roguelite","magia","fantasia","disparos","primera persona","procedural","un jugador"],
+      desc: "Un joven mago se enfrenta a mazmorras generadas proceduralmente lanzando hechizos en primera persona. Roguelite rápido, arcade y directo, con mucha variedad de armas mágicas.",
+      similar: ["Have a Nice Death"]
+    },
+    {
+      emoji: "🪖", title: "UnMetal", platform: "PC",
+      code: "",
+      genres: ["Sigilo","Acción","Aventura","Comedia"],
+      tags: ["sigilo","humor","accion","parodia","aventura","isometrico","carcel","un jugador"],
+      desc: "Jesse Fox escapa de una prisión militar secreta contando su propia versión de los hechos, poco fiable y muy exagerada. Parodia descarada de Metal Gear Solid con sigilo isométrico y mucho humor.",
+      similar: ["Have a Nice Death"]
+    },
+    {
+      emoji: "🐙", title: "Silt", platform: "PC",
+      code: "",
+      genres: ["Puzles","Exploración","Aventura"],
+      tags: ["puzles","exploracion","arte","submarino","atmosferico","posesion","criaturas marinas","sin dialogos"],
+      desc: "Buceas por un océano abisal en blanco y negro poseyendo a las criaturas marinas para resolver puzles. Atmósfera opresiva y hermosa a partes iguales, sin diálogos.",
+      similar: ["Abzû", "Limbo"]
+    },
+    {
+      emoji: "🧟", title: "The Walking Dead", platform: "PC",
+      code: "",
+      genres: ["Aventura narrativa","Point & click","Drama"],
+      tags: ["narrativo","decisiones","drama","emocional","zombis","episodico","point and click","apocalipsis"],
+      desc: "Lee protege a Clementine, una niña huérfana, durante el apocalipsis zombi. Aventura episódica de Telltale centrada en decisiones morales difíciles y relaciones humanas, no en la acción.",
+      similar: ["Until Then", "What Remains of Edith Finch"]
+    },
+    {
+      emoji: "🌘", title: "Children of Silentown", platform: "PC",
+      code: "",
+      genres: ["Aventura","Point & click","Terror suave"],
+      tags: ["terror","puzles","narrativa","cuento oscuro","musica","pueblo","infantil","un jugador"],
+      desc: "Lucy vive en un pueblo rodeado de un bosque donde hablar alto atrae monstruos. Point & click de terror infantil con puzles, minijuegos de canto y un misterio sobre desapariciones.",
+      similar: ["Bramble: The Mountain King", "Little Nightmares"]
+    },
+    {
+      emoji: "🪖", title: "Conscript", platform: "PC",
+      code: "",
+      genres: ["Terror de supervivencia","Acción"],
+      tags: ["terror","supervivencia","belica","gestion","dificultad","primera guerra mundial","trincheras","un jugador"],
+      desc: "Un soldado francés busca a su hermano en las trincheras de la Primera Guerra Mundial. Terror de supervivencia clásico con cámaras fijas, recursos limitados y una ambientación bélica poco habitual en el género.",
+      similar: ["Withering Rooms"]
+    },
+    {
+      emoji: "🌗", title: "Shady Part of Me", platform: "PC",
+      code: "",
+      genres: ["Puzles","Plataformas","Aventura"],
+      tags: ["puzles","emocional","arte","plataformas","luz y sombra","trauma","corto","un jugador"],
+      desc: "Controlas a una niña y a su propia sombra, cada una con su mecánica de movimiento, para resolver puzles de luz y oscuridad. Metáfora visual sobre el trauma y la salud mental.",
+      similar: ["Gris", "Rime"]
+    },
+    {
+      emoji: "🕯️", title: "White Night", platform: "PC",
+      code: "",
+      genres: ["Terror","Puzles","Aventura"],
+      tags: ["terror","puzles","cine negro","atmosferico","luz","años 30","blanco y negro","un jugador"],
+      desc: "Un hombre se refugia en una mansión encantada en los años 30 y solo puede iluminar el camino con cerillas y farolas. Terror en blanco y negro con estética de cine negro clásico.",
+      similar: ["Withering Rooms", "Little Nightmares"]
+    },
+    {
+      emoji: "🔮", title: "Morkredd", platform: "PC",
+      code: "",
+      genres: ["Puzles","Cooperativo","Aventura"],
+      tags: ["puzles","cooperativo","minimalista","luz y sombra","atmosferico","esfera","dos jugadores","corto"],
+      desc: "Guías una esfera que debe permanecer siempre en la sombra, evitando la luz que la destruye. Jugable en solitario o cooperativo, con una estética minimalista y opresiva.",
+      similar: ["Shady Part of Me", "Hue"]
+    },
+    {
+      emoji: "🔵", title: "Blue Fire", platform: "PC",
+      code: "",
+      genres: ["Plataformas","Metroidvania","Acción","Aventura"],
+      tags: ["plataformas","metroidvania","accion","fantasia oscura","dificultad","3d","reto","un jugador"],
+      desc: "Explora las ruinas de un reino maldito con plataformas 3D muy exigentes y combate ágil. Metroidvania con mucho énfasis en el reto de saltos precisos.",
+      similar: ["Hollow Knight", "8Doors: Arum's Afterlife Adventure"]
+    },
+    {
+      emoji: "🏚️", title: "Tormented Souls", platform: "PC",
+      code: "",
+      genres: ["Terror de supervivencia","Puzles"],
+      tags: ["terror","supervivencia","puzles","camara fija","clasico","hospital","recursos limitados","un jugador"],
+      desc: "Caroline despierta en un hospital abandonado tras investigar la desaparición de unas gemelas. Homenaje directo al survival horror clásico: cámaras fijas, recursos escasos y puzles retorcidos.",
+      similar: ["White Night", "Conscript"]
+    },
+    {
+      emoji: "🌴", title: "Tunche", platform: "PC",
+      code: "",
+      genres: ["Roguelite","Beat 'em up","Cooperativo"],
+      tags: ["accion","roguelite","cooperativo","mitologia","combate","amazonia","dibujado a mano","cuatro jugadores"],
+      desc: "Cuatro amigos se adentran en la selva amazónica peruana enfrentando criaturas del folclore local. Beat 'em up roguelite cooperativo dibujado a mano.",
+      similar: ["Have a Nice Death"]
+    },
+    {
+      emoji: "💊", title: "Revita", platform: "PC",
+      code: "",
+      genres: ["Roguelite","Plataformas","Acción"],
+      tags: ["roguelite","plataformas","dificultad","precision","permadeath","torre infinita","riesgo recompensa","un jugador"],
+      desc: "Escalas una torre infinita sacrificando tu propia vida máxima para conseguir mejoras. Roguelite de plataformas y disparos centrado en el riesgo-recompensa y la precisión.",
+      similar: ["Have a Nice Death", "Ziggurat"]
+    },
+    {
+      emoji: "🐦‍⬛", title: "Kill the Crows", platform: "PC",
+      code: "",
+      genres: ["Acción","Plataformas","Aventura"],
+      tags: ["accion","plataformas","fantasia oscura","combate","atmosferico","cazador","lugubre","un jugador"],
+      desc: "Un cazador se abre paso a través de un mundo sombrío plagado de cuervos y criaturas corrompidas. Acción de plataformas 2D con combate exigente y ambientación lúgubre.",
+      similar: ["Blue Fire", "Withering Rooms"]
+    },
+    {
+      emoji: "🏴‍☠️", title: "Return to Monkey Island", platform: "PC",
+      genres: ["Aventura","Point & click","Comedia"],
+      tags: ["comedia","piratas","puzles","narrativa","clasico"],
+      desc: "Guybrush Threepwood vuelve a buscar el secreto de Monkey Island, décadas después del clásico original. Point & click con el humor absurdo de siempre, dirigido por Ron Gilbert, su creador.",
+      similar: ["UnMetal", "Genesis Noir"]
+    }
+  ];
+
+  const grid = document.getElementById('grid');
+  const filtersEl = document.getElementById('filters');
+  document.getElementById('countLabel').textContent = GAMES.length;
+
+  const allGenres = [...new Set(GAMES.flatMap(g => g.genres))].sort();
+  let active = null;
+  let sortMode = 'default';
+
+  const sortDefaultBtn = document.getElementById('sortDefault');
+  const sortAZBtn = document.getElementById('sortAZ');
+  sortDefaultBtn.onclick = () => { sortMode = 'default'; updateSortButtons(); renderGrid(); };
+  sortAZBtn.onclick = () => { sortMode = 'az'; updateSortButtons(); renderGrid(); };
+
+  function updateSortButtons(){
+    sortDefaultBtn.classList.toggle('active', sortMode === 'default');
+    sortAZBtn.classList.toggle('active', sortMode === 'az');
+  }
+
+  function renderFilters(){
+    filtersEl.innerHTML = '';
+    const allChip = document.createElement('button');
+    allChip.className = 'chip' + (active === null ? ' active' : '');
+    allChip.textContent = 'Todos';
+    allChip.onclick = () => { active = null; renderFilters(); renderGrid(); };
+    filtersEl.appendChild(allChip);
+
+    allGenres.forEach(genre => {
+      const chip = document.createElement('button');
+      chip.className = 'chip' + (active === genre ? ' active' : '');
+      chip.textContent = genre;
+      chip.onclick = () => { active = genre; renderFilters(); renderGrid(); };
+      filtersEl.appendChild(chip);
+    });
+  }
+
+  function renderGrid(){
+    let list = active ? GAMES.filter(g => g.genres.includes(active)) : [...GAMES];
+    if(sortMode === 'az'){
+      list = [...list].sort((a, b) => a.title.localeCompare(b.title, 'es'));
+    }
+    grid.innerHTML = '';
+    if(list.length === 0){
+      grid.innerHTML = '<div class="empty">Ningún juego con ese género todavía.</div>';
+      return;
+    }
+    list.forEach(g => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="card-top">
+          <span class="glyph">${g.emoji}</span>
+          <span class="platform">${g.platform}</span>
+        </div>
+        <h2>${g.title}</h2>
+        <div class="genres">${g.genres.join(' · ')}</div>
+        <p class="desc">${g.desc}</p>
+        <div class="tags">${g.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+        ${g.similar.length ? `<div class="similar">Parecido a <span>${g.similar.join(', ')}</span></div>` : ''}
+      `;
+      card.addEventListener('click', () => openModal(g));
+      grid.appendChild(card);
+    });
+  }
+
+  const overlay = document.getElementById('overlay');
+  const modalContent = document.getElementById('modalContent');
+
+  function openModal(g){
+    modalContent.innerHTML = `
+      <div class="modal-hero">
+        <button class="modal-close" id="modalClose" aria-label="Cerrar">✕</button>
+        <div class="modal-glyph">${g.emoji}</div>
+        <h2>${g.title}</h2>
+        <div class="modal-meta">
+          <span class="platform">${g.platform}</span>
+          <span class="modal-genres">${g.genres.join(' · ')}</span>
+        </div>
+      </div>
+      <div class="modal-body">
+        <p class="desc">${g.desc}</p>
+        <div>
+          <p class="modal-section-label">Código del juego</p>
+          <div class="modal-code-box">
+            <code class="${g.code ? '' : 'empty'}" id="modalCode">${g.code ? g.code : 'Sin código añadido'}</code>
+            <button class="copy-btn" id="copyCodeBtn" ${g.code ? '' : 'disabled'}>Copiar</button>
+          </div>
+        </div>
+        <div>
+          <p class="modal-section-label">Etiquetas</p>
+          <div class="tags">${g.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+        </div>
+        ${g.similar.length ? `
+        <div>
+          <p class="modal-section-label">Parecido a</p>
+          <div class="modal-similar-list">${g.similar.map(s => `<span>${s}</span>`).join('')}</div>
+        </div>` : ''}
+      </div>
+    `;
+    document.getElementById('modalClose').addEventListener('click', closeModal);
+    const copyBtn = document.getElementById('copyCodeBtn');
+    if(g.code){
+      copyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(g.code).then(() => {
+          copyBtn.textContent = 'Copiado';
+          setTimeout(() => { copyBtn.textContent = 'Copiar'; }, 1500);
+        });
+      });
+    }
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal(){
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  overlay.addEventListener('click', (e) => {
+    if(e.target === overlay) closeModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape') closeModal();
+  });
+
+  renderFilters();
+  renderGrid();
+</script>
+
+</body>
+</html>
